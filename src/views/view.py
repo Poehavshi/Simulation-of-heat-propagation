@@ -1,82 +1,84 @@
-"""
-Provides a View tkinter GUI suitable for plotting functions that use two
-numerical user inputs.
-Contains:
-* MPLgraph    A matplotlib backend tkinter widget used by View
-* View    A tkinter GUI with two numerical entry boxes and a matplotlib canvas.
-"""
-
 import matplotlib as mpl
 import tkinter as tk
 
-mpl.use("TkAgg")
+import numpy as np
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
-                                               NavigationToolbar2Tk)  # NavigationToolbar2TkAgg was deprecated
+                                               NavigationToolbar2Tk)  # NavigationToolbar2TkAgg является устаревшим
 from tkinter import ttk
+
+mpl.use("TkAgg")
 
 
 class MPLgraph(FigureCanvasTkAgg):
-    """The canvas-like matplotlib object used by View.
+    """
+    Matplotlib объект похожий на tk.Canvas()
+    Используется объектом View для отображения графика
     """
 
-    def __init__(self, figure, parent=None, **options):
+    def __init__(self, figure: mpl.figure.Figure, parent=None, **options):
         """
-        argument:
-            figure: a matplotlib.figure.Figure object
+        :param figure: область на которой происходит отрисовка графика
         """
         FigureCanvasTkAgg.__init__(self, figure, parent, **options)
         self.figure = figure
         self.add = figure.add_subplot(111)
-        # .show() was deprecated and changed to .draw(). See:
+        # .show() является устаревшим и заменён на .draw(). См.:
         # https://github.com/matplotlib/matplotlib/pull/9275
         self.draw()
         self.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.toolbar = NavigationToolbar2Tk(self, parent)
         self.toolbar.update()
 
-    def plot(self, x, y):
-        """Take two arrays for x and y coordinates and plot the data."""
+    def plot(self, x: object, y: object) -> object:
+        """
+        Берёт массивы координат x и y, по ним рисует графики.
+        """
         self.add.plot(x, y)
-        self.figure.canvas.draw()  # DRAW IS CRITICAL TO REFRESH
+        self.figure.canvas.draw()
 
     def clear(self):
-        """Erase the plot."""
+        """
+        Очищает область с графиком.
+        """
         self.add.clear()
         self.figure.canvas.draw()
 
 
 class View(ttk.Frame):
-    """A tkinter GUI with two numerical entry boxes (labeled "base" and
-    "exponent"), and a matplotlib canvas.
+    """
+    Tkinter GUI с двумя областями ввода ("base" и "exponent") и
+    холстом (canvas) matplotlib
 
-    View assumes the controller has an update_view method, that accepts
-    variables in the format:
+    Представление предполагает, что у контроллера есть метод update_view(), который принимает
+    переменные в формате:
 
-        values = {'base': b, 'exponent': e}
-    where b and e are floats, and returns an (x, y) tuple of numpy arrays.
+    values = {'base': b, 'exponent': e}
 
-    View provides the following methods for external use by the controller:
+    где b и e - float,
+    и возвращает (x, y) кортеж из numpy.array.
 
-    * set_values    used to initialize the view
-    * clear    clears the MPLgraph plot
-    * plot    plots data provided as x, y tuple of numpy arrays
+    Предоставление содержит следующие методы для внешнего использования контроллером:
 
-    TODO: The view currently allows the controller to be called when widgets are
-    left empty, which results in a ValueError when the model is called. A
-    workaround such as filling empty entry widgets with 0. is required.
+    * set_values используется для первоначальной инициализации представления
+    * clear  очищает MPLgraph plot
+    * plot рисует данные формата (x, y) кортежа из numpy.array
     """
 
     def __init__(self, parent, controller, **options):
-        """Create the necessary widgets, and a dict self.values for
-        storing the state of the entry widgets in the format:
+        """
+        Создаёт необходимые виджеты и словарь self.values для хранения
+        состояний полей ввода в формате:
             {'base': b, 'exponent': e}
-        where b and e are floats.
+        где b и e - float.
 
-        Requires arguments:
-            parent: parent widget
-            controller: the object that provides the update_view method
+        :param parent: виджет-родитель
+        :param controller: объект с update_view методом
         """
         ttk.Frame.__init__(self, parent, **options)
+        self.exponent = None
+        self.exponent_entry = None
+        self.base = None
+        self.base_entry = None
         self.pack()
 
         self.parent = parent
@@ -88,8 +90,10 @@ class View(ttk.Frame):
         self.create_canvas()
 
     def create_entries(self):
-        """Add entry widgets and associated labels to View, and assign
-        StringVar objects to the entry widgets."""
+        """
+        Создаёт поля ввода и связанные с ними лейблы в View, также привязывает
+        StringVar объекты к виджетам поля ввода.
+        """
         self.base_entry = self.add_entry('base')
         self.base = tk.StringVar()
         self.base_entry.config(textvariable=self.base)
@@ -99,46 +103,42 @@ class View(ttk.Frame):
         self.exponent = tk.StringVar()
         self.exponent_entry.config(textvariable=self.exponent)
 
-    def add_entry(self, text):
-        """Create a label with text=text, and an entry with numerical entry
-        validation; pack them; and return the entry object for future
-        reference.
+    def add_entry(self, text: str):
+        """
+        Создаёт пару виджетов лейбла и поля ввода
 
-        Argument:
-            text:    string that is both the label text and the key for the
-                     self.values dict.
-        Returns:
-            entry:    The created ttk.Entry object
+
+        :param text: строка с текстом для лейбла, поля ввода и для ключа в self.values словаре.
+
+        :return entry: созданный ttk.Entry объект
         """
         ttk.Label(self, text=text).pack(side=tk.LEFT)
 
-        # check on each keypress for numerical entry
+        # проверка каждого нажатия клавиши на ввод числового значения в поле ввода
         entry = ttk.Entry(self, validate='key')
         entry['validatecommand'] = (self.register(self.is_number_or_empty),
                                     '%P')
-        entry['invalidcommand'] = 'bell'  # beep if invalid keypress
+        entry['invalidcommand'] = 'bell'  # звуковой сигнал, если нажали неправильно
         entry.pack(side=tk.LEFT)
         return entry
 
-    def is_number_or_empty(self, entry):
-        """Test (e.g. on keypress) to see if entry status is acceptable (either
-        empty, or able to be converted to a float.)
+    def is_number_or_empty(self, entry: str) -> bool:
+        """
+        Проверяет (например по нажатию клавиши) чтобы увидеть, что состояние поле ввода является приемлемым
+        (не пустым и возможным для конвертации во float)
 
-        Argument:
-            entry: string
-        Returns:
-            boolean
+        :param entry: строка, которую нужно проверить.
+        :return: является ли строка правильной
         """
         return self.is_number(entry) or self.is_empty(entry)
 
     @staticmethod
-    def is_number(entry):
-        """Test to see if entry value is a number.
+    def is_number(entry: str) -> bool:
+        """
+        Проверка ввода на число
 
-         Argument:
-            entry: string
-        Returns:
-            boolean
+        :param entry: строка, которая должна содержать число.
+        :return: число ли в аргументе
         """
         try:
             float(entry)
@@ -153,7 +153,9 @@ class View(ttk.Frame):
         return False
 
     def create_bindings(self):
-        """Bind events across all entry widgets"""
+        """
+        Привязывает события ко всем entry виджетам (полям ввода)
+        """
         self.bind_class('TEntry', '<FocusIn>',
                         lambda event: self.on_focus_in(event))
         self.bind_class('TEntry', '<Return>',
@@ -164,94 +166,105 @@ class View(ttk.Frame):
 
     @staticmethod
     def on_focus_in(event):
-        """Select the entire contents of entry widget upon focus, for easy
-        editing.
+        """
+        Выбирает содержимое поля ввода под фокусом для более простого редактирования его содержимого
         """
         event.widget.selection_range(0, tk.END)
 
     def on_value_entry(self, event):
-        """When a valid change to the entry is committed, request a view
-        refresh, and set focus on next entry widget."""
+        """
+        Когда подходящее изменение было внесено в поле ввода,
+        запрашивает обновления представления и ставит фокус на следующем подходящем виджете
+        """
         self.refresh()
         self.set_next_focus(event.widget.tk_focusNext())
 
     def refresh(self):
-        """Overwrite self.values and request a plot refresh, but only if an
-        entry's value is changed.
+        """
+        Переписывает self.values и запрашивает обновление графика, но только в том случае,
+        если было изменено значение в поле ввода.
         """
         if self.entry_is_changed():
             self.update_values()
             self.controller.update_view(self.values)
 
-    def entry_is_changed(self):
-        """Compare current widget entries to the dictionary of previously
-        stored values.
-
-        Returns: Boolean
+    def entry_is_changed(self) -> bool:
         """
-        if self.current_values() != self.values:
+        Сравнивает текущие значения в виджете полей ввода со значениями в словаре,
+        который хранит предыдущие значения.
+
+        :return изменились ли значения в entry
+        """
+        if self.get_current_values() != self.values:
             return True
         return False
 
-    def current_values(self):
-        """Get current widget values and store them in a dictionary.
+    def get_current_values(self) -> dict:
+        """
+        Получает текущие значения в виджете
 
-        Returns: a dict in self.values format
+        :return значения base и exponent в виджете
         """
         return {'base': float(self.base.get()),
                 'exponent': float(self.exponent.get())}
 
     def update_values(self):
-        """Overwrite the dictionary of previous entry values with that for
-        the current values."""
-        self.values = self.current_values()
-
-    def set_next_focus(self, NextWidget):
-        """Starting with NextWidget, traverse the order of widgets until the
-        next Entry widget is found, then set focus to it. Used to ignore all
-        the matplotlib widgets.
-
-        Argument:
-            NextWidget: a tkinter widget
         """
-        if type(NextWidget) is not ttk.Entry:
-            self.set_next_focus(NextWidget.tk_focusNext())
+        Переписывает словарь с предыдущими значениями в поле ввода текущими значениями
+        """
+        self.values = self.get_current_values()
+
+    def set_next_focus(self, next_widget):
+        """
+        Начиная с next_widget, перемещается по всем виджетам, пока не найдет
+        Entry - поле ввода. Нужен, чтобы игнорировать все остальные matplotlib виджеты
+
+        :param next_widget: виджет, с которого нужно начать итерацию
+        """
+        if type(next_widget) is not ttk.Entry:
+            self.set_next_focus(next_widget.tk_focusNext())
         else:
-            NextWidget.focus()
+            next_widget.focus()
 
     def on_tab(self, event):
-        """Wrapper of on_value_entry; required to override the Tab key's
-        default behavior."""
+        """
+
+        Обёртка для on_value_entry; нужен, чтобы переписать стандартное поведение клавиши Tab
+        """
         self.on_value_entry(event)
         return 'break'
 
     def create_canvas(self):
-        """Adds a MPLgraph widget to the bottom of View's parent."""
+        """
+        Добавляет виджет MPLgraph в нижнюю часть View.
+        """
         self.figure = mpl.figure.Figure(figsize=(5, 4), dpi=100)
         self.canvas = MPLgraph(self.figure, self.parent)
         self.canvas._tkcanvas.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
 
-    # The three methods below provide the interface to the controller
-    def set_values(self, values):
-        """Used by the controller to initialize the view's entry values and
-        data.
+    # Три метода ниже предоставляют интерфейс для контроллера
+    def set_values(self, values: dict):
+        """
+        Используется контроллером для инициализации значений по умолчанию
 
-        Argument:
-            values: a dict in self.values format
+        :param values: значения по умолчанию
         """
         self.base.set(values['base'])
         self.exponent.set(values['exponent'])
         self.values = values
 
     def clear(self):
-        """ Erase the matplotlib canvas."""
+        """
+        Очищает matplotlib canvas.
+        """
         self.canvas.clear()
 
-    def plot(self, x, y):
-        """Plot the model's results to the matplotlib canvas.
+    def plot(self, x: np.array, y: np.array):
+        """
+        Рисует данные из модели на холст (canvas) matplotlib
 
-        Arguments:
-            x, y: numpy arrays of x and y coordinates
+        :param x - значения координаты x
+        :param y - значения координаты y
         """
         self.canvas.plot(x, y)
 
