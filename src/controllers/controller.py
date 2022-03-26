@@ -29,12 +29,12 @@ class Controller:
     * update_view - Обновляет данные для отрисовки и обновляет plot в представлении
     """
 
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root_tk: tk.Tk):
         """
-        :param root: tkinter.Tk() объект, который используется представлением.
+        :param root_tk: tkinter.Tk() объект, который используется представлением.
         """
         self.plot_data = None
-        self.view = View(root, self)
+        self.view = View(root_tk, self)
         self.default_values = {'base': 1, 'exponent': 2}
         self.initialize_view()
 

@@ -29,7 +29,7 @@ class MPLgraph(FigureCanvasTkAgg):
         self.toolbar = NavigationToolbar2Tk(self, parent)
         self.toolbar.update()
 
-    def plot(self, x: object, y: object) -> object:
+    def plot(self, x: np.array, y: np.array):
         """
         Берёт массивы координат x и y, по ним рисует графики.
         """
@@ -75,6 +75,8 @@ class View(ttk.Frame):
         :param controller: объект с update_view методом
         """
         ttk.Frame.__init__(self, parent, **options)
+        self.canvas = None
+        self.figure = None
         self.exponent = None
         self.exponent_entry = None
         self.base = None
@@ -240,7 +242,7 @@ class View(ttk.Frame):
         """
         self.figure = mpl.figure.Figure(figsize=(5, 4), dpi=100)
         self.canvas = MPLgraph(self.figure, self.parent)
-        self.canvas._tkcanvas.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
+        self.canvas.tkcanvas.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
 
     # Три метода ниже предоставляют интерфейс для контроллера
     def set_values(self, values: dict):
