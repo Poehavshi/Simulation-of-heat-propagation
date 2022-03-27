@@ -6,8 +6,8 @@
 """
 
 import tkinter as tk
-from src.views.view import View
-from src.models import model
+from views.view import View
+from models import model
 
 
 class Controller:
@@ -35,7 +35,7 @@ class Controller:
         """
         self.plot_data = None
         self.view = View(root_tk, self)
-        self.default_values = {'base': 1, 'exponent': 2}
+        self.default_values = {'N': 1, 't': 2}
         self.initialize_view()
 
     def initialize_view(self):
@@ -60,7 +60,8 @@ class Controller:
 
         :param values: словарь с данным от модели
         """
-        self.plot_data = model.generate_exp_data(**values)
+        summodel = model.SumModel()
+        self.plot_data = summodel.generate_w_data(**values)
 
     def update_view_plot(self):
         """

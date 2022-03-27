@@ -77,10 +77,10 @@ class View(ttk.Frame):
         ttk.Frame.__init__(self, parent, **options)
         self.canvas = None
         self.figure = None
-        self.exponent = None
-        self.exponent_entry = None
-        self.base = None
-        self.base_entry = None
+        self.param = None
+        self.param_entry = None
+        self.countN = None
+        self.countN_entry = None
         self.pack()
 
         self.parent = parent
@@ -96,14 +96,14 @@ class View(ttk.Frame):
         Создаёт поля ввода и связанные с ними лейблы в View, также привязывает
         StringVar объекты к виджетам поля ввода.
         """
-        self.base_entry = self.add_entry('base')
-        self.base = tk.StringVar()
-        self.base_entry.config(textvariable=self.base)
-        self.base_entry.focus_set()
+        self.countN_entry = self.add_entry('N')
+        self.countN = tk.StringVar()
+        self.countN_entry.config(textvariable=self.countN)
+        self.countN_entry.focus_set()
 
-        self.exponent_entry = self.add_entry('exponent')
-        self.exponent = tk.StringVar()
-        self.exponent_entry.config(textvariable=self.exponent)
+        self.param_entry = self.add_entry('t')
+        self.param = tk.StringVar()
+        self.param_entry.config(textvariable=self.param)
 
     def add_entry(self, text: str):
         """
@@ -207,8 +207,8 @@ class View(ttk.Frame):
 
         :return значения base и exponent в виджете
         """
-        return {'base': float(self.base.get()),
-                'exponent': float(self.exponent.get())}
+        return {'N': int(self.countN.get()),
+                't': int(self.param.get())}
 
     def update_values(self):
         """
@@ -242,7 +242,7 @@ class View(ttk.Frame):
         """
         self.figure = mpl.figure.Figure(figsize=(5, 4), dpi=100)
         self.canvas = MPLgraph(self.figure, self.parent)
-        self.canvas.tkcanvas.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
 
     # Три метода ниже предоставляют интерфейс для контроллера
     def set_values(self, values: dict):
@@ -251,8 +251,8 @@ class View(ttk.Frame):
 
         :param values: значения по умолчанию
         """
-        self.base.set(values['base'])
-        self.exponent.set(values['exponent'])
+        self.countN.set(values['N'])
+        self.param.set(values['t'])
         self.values = values
 
     def clear(self):
