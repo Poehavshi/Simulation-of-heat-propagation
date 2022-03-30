@@ -64,7 +64,7 @@ class View(ttk.Frame):
     * plot рисует данные формата (x, y) кортежа из numpy.array
     """
 
-    def __init__(self, parent, controller, **options):
+    def __init__(self, parent, controller, param_name, **options):
         """
         Создаёт необходимые виджеты и словарь self.values для хранения
         состояний полей ввода в формате:
@@ -77,8 +77,10 @@ class View(ttk.Frame):
         ttk.Frame.__init__(self, parent, **options)
         self.canvas = None
         self.figure = None
-        self.param = None
-        self.param_entry = None
+        self.named_param = None
+        self.named_param_entry = None
+        self.param_name = param_name
+
         self.countN = None
         self.countN_entry = None
         self.pack()
@@ -101,9 +103,11 @@ class View(ttk.Frame):
         self.countN_entry.config(textvariable=self.countN)
         self.countN_entry.focus_set()
 
-        self.param_entry = self.add_entry('t')
-        self.param = tk.StringVar()
-        self.param_entry.config(textvariable=self.param)
+        self.named_param_entry = self.add_entry(self.param_name)
+        self.named_param = tk.StringVar()
+        self.named_param_entry.config(textvariable=self.named_param)
+
+
 
     def add_entry(self, text: str):
         """
@@ -208,7 +212,7 @@ class View(ttk.Frame):
         :return значения base и exponent в виджете
         """
         return {'N': int(self.countN.get()),
-                't': int(self.param.get())}
+                self.param_name: int(self.named_param.get())}
 
     def update_values(self):
         """
@@ -252,7 +256,7 @@ class View(ttk.Frame):
         :param values: значения по умолчанию
         """
         self.countN.set(values['N'])
-        self.param.set(values['t'])
+        self.named_param.set(values[self.param_name])
         self.values = values
 
     def clear(self):
@@ -273,5 +277,5 @@ class View(ttk.Frame):
 
 if __name__ == '__main__':
     root = tk.Tk()
-    app = View(root, controller=None)
+    app = View(root, controller=None, param_name='t')
     root.mainloop()

@@ -68,7 +68,7 @@ class SumModel:
             result += self._calculate_term(i + 1, r, t)
         return result
 
-    def generate_w_data(self, t: float, N: int):
+    def generate_w_data_with_fix_t(self, t: float, N: int):
         """
         Генерирует значения функции w(r, t)
 
@@ -82,6 +82,21 @@ class SumModel:
         for i in range(800):
             w[i] = self.calculate_sum(r[i], t, N)
         return r, w
+
+    def generate_w_data_with_fix_r(self, r: float, N: int):
+        """
+        Генерирует значения функции w(r, t)
+
+        :param N: количество элементов (точность подсчёта функции)
+        :param r: фиксированный параметр r
+
+        :return вектор двух numpy массивов
+        """
+        t = np.linspace(0, 10, 800)
+        w = np.zeros(800)
+        for i in range(800):
+            w[i] = self.calculate_sum(r, t[i], N)
+        return t, w
 
 
 if __name__ == "__main__":

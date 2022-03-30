@@ -29,13 +29,14 @@ class Controller:
     * update_view - Обновляет данные для отрисовки и обновляет plot в представлении
     """
 
-    def __init__(self, root_tk: tk.Tk):
+    def __init__(self, root_tk: tk.Tk, param_name):
         """
         :param root_tk: tkinter.Tk() объект, который используется представлением.
         """
         self.plot_data = None
-        self.view = View(root_tk, self)
-        self.default_values = {'N': 1, 't': 2}
+        self.param_name = param_name
+        self.view = View(root_tk, self, param_name)
+        self.default_values = {'N': 1, param_name: 2}
         self.initialize_view()
 
     def initialize_view(self):
@@ -61,7 +62,11 @@ class Controller:
         :param values: словарь с данным от модели
         """
         summodel = model.SumModel()
-        self.plot_data = summodel.generate_w_data(**values)
+        if self.param_name == 't':
+            self.plot_data = summodel.generate_w_data_with_fix_t(**values)
+        elif self.param_name == 'r':
+            self.plot_data = summodel.generate_w_data_with_fix_r(**values)
+
 
     def update_view_plot(self):
         """
@@ -74,5 +79,5 @@ class Controller:
 
 if __name__ == '__main__':
     root = tk.Tk()
-    app = Controller(root)
+    app = Controller(root, 't')
     root.mainloop()

@@ -1,8 +1,9 @@
-import tkinter as tk
-from controllers.controller import Controller
 
-
+import subprocess
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = Controller(root)
-    root.mainloop()
+    process = subprocess.Popen(["python", "main_r.py"])
+    process1 = subprocess.Popen(["python", "main_t.py"])
+
+    process.wait()
+    process1.wait()
+
