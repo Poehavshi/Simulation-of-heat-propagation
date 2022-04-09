@@ -4,5 +4,5 @@ from controllers.controller import Controller
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = Controller(root, param_name='t')
+    #app = Controller(root, param_name='t')
     root.mainloop()

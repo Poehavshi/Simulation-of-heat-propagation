@@ -29,11 +29,11 @@ class MPLgraph(FigureCanvasTkAgg):
         self.toolbar = NavigationToolbar2Tk(self, parent)
         self.toolbar.update()
 
-    def plot(self, x: np.array, y: np.array):
+    def plot(self, x: np.array, y: np.array, color):
         """
         Берёт массивы координат x и y, по ним рисует графики.
         """
-        self.add.plot(x, y)
+        self.add.plot(x, y,color = color)
         self.figure.canvas.draw()
 
     def clear(self):
@@ -64,7 +64,7 @@ class View(ttk.Frame):
     * plot рисует данные формата (x, y) кортежа из numpy.array
     """
 
-    def __init__(self, parent, controller, param_name, **options):
+    def __init__(self, parent, controller, **options):
         """
         Создаёт необходимые виджеты и словарь self.values для хранения
         состояний полей ввода в формате:
@@ -77,9 +77,15 @@ class View(ttk.Frame):
         ttk.Frame.__init__(self, parent, **options)
         self.canvas = None
         self.figure = None
-        self.named_param = None
-        self.named_param_entry = None
-        self.param_name = param_name
+        self.named_paramr = None
+        self.named_paramr_entry = None
+        self.paramr_name = 'r'
+        self.named_paramt = None
+        self.named_paramt_entry = None
+        self.paramt_name = 't'
+        self.named_paramx = None
+        self.named_paramx_entry = None
+        self.paramx_name = 'x'
 
         self.countN = None
         self.countN_entry = None
@@ -103,9 +109,17 @@ class View(ttk.Frame):
         self.countN_entry.config(textvariable=self.countN)
         self.countN_entry.focus_set()
 
-        self.named_param_entry = self.add_entry(self.param_name)
-        self.named_param = tk.StringVar()
-        self.named_param_entry.config(textvariable=self.named_param)
+        self.named_paramr_entry = self.add_entry(self.paramr_name)
+        self.named_paramr = tk.StringVar()
+        self.named_paramr_entry.config(textvariable=self.named_paramr)
+
+        self.named_paramt_entry = self.add_entry(self.paramt_name)
+        self.named_paramt = tk.StringVar()
+        self.named_paramt_entry.config(textvariable=self.named_paramt)
+
+        self.named_paramx_entry = self.add_entry(self.paramx_name)
+        self.named_paramx = tk.StringVar()
+        self.named_paramx_entry.config(textvariable=self.named_paramx)
 
 
 
@@ -212,7 +226,9 @@ class View(ttk.Frame):
         :return значения base и exponent в виджете
         """
         return {'N': int(self.countN.get()),
-                self.param_name: int(self.named_param.get())}
+                'r': int(self.named_paramr.get()),
+                't': int(self.named_paramt.get()),
+                'x': int(self.named_paramx.get())}
 
     def update_values(self):
         """
@@ -256,7 +272,9 @@ class View(ttk.Frame):
         :param values: значения по умолчанию
         """
         self.countN.set(values['N'])
-        self.named_param.set(values[self.param_name])
+        self.named_paramr.set(values[self.paramr_name])
+        self.named_paramt.set(values[self.paramt_name])
+        self.named_paramx.set(values[self.paramx_name])
         self.values = values
 
     def clear(self):

@@ -29,14 +29,13 @@ class Controller:
     * update_view - Обновляет данные для отрисовки и обновляет plot в представлении
     """
 
-    def __init__(self, root_tk: tk.Tk, param_name):
+    def __init__(self, root_tk: tk.Tk):
         """
         :param root_tk: tkinter.Tk() объект, который используется представлением.
         """
         self.plot_data = None
-        self.param_name = param_name
-        self.view = View(root_tk, self, param_name)
-        self.default_values = {'N': 1, param_name: 2}
+        self.view = View(root_tk, self)
+        self.default_values = {'N': 1, 'r': 0, 't':0,'x':0}
         self.initialize_view()
 
     def initialize_view(self):
@@ -62,10 +61,8 @@ class Controller:
         :param values: словарь с данным от модели
         """
         summodel = model.SumModel()
-        if self.param_name == 't':
-            self.plot_data = summodel.generate_w_data_with_fix_t(**values)
-        elif self.param_name == 'r':
-            self.plot_data = summodel.generate_w_data_with_fix_r(**values)
+        self.plot_data = summodel.generate_w_data(**values)
+        #self.plot_data = summodel.generate_w_data_with_fix_r(**values)
 
 
     def update_view_plot(self):
@@ -74,10 +71,13 @@ class Controller:
         использует копию данных для отрисовки от контроллера.
         """
         self.view.canvas.clear()
-        self.view.canvas.plot(*self.plot_data)
+        if (self.plot_data[0]!=0):
+            self.view.canvas.plot(self.plot_data[1],self.plot_data[2],color='b')
+        if (self.plot_data[3]!=0):
+            self.view.canvas.plot(self.plot_data[4],self.plot_data[5],color='r')
 
 
 if __name__ == '__main__':
     root = tk.Tk()
-    app = Controller(root, 't')
+    app = Controller(root)
     root.mainloop()
