@@ -37,6 +37,8 @@ class SumModel:
         self.l = l
         self.R = R
 
+        self.mu_array = jn_zeros(0, 50)
+
     def _calculate_term(self, n: int, r: float, t: float) -> float:
         """
         Функция подсчёта n-ого слагаемого суммы
@@ -47,7 +49,8 @@ class SumModel:
 
         :return значение одного слагаемого суммы
         """
-        mu_n = jn_zeros(0, n)[n - 1]
+        # mu_n = jn_zeros(0, n)[n - 1]
+        mu_n = self.mu_array[n-1]
         result = (5 * self.R * jv(1, self.R / 4)) / (mu_n ** 2 * (jv(1, mu_n)) ** 2)
         result *= exp(-(t * (self.l * self.k * (mu_n / self.R) ** 2) + 2 * self.alpha) / (self.l * self.c))
         result *= jv(0, (mu_n * r) / self.R)
@@ -85,37 +88,6 @@ class SumModel:
             w[i] = self.calculate_sum(ox[i], t, N)
             v[i] = self.calculate_sum(r, oy[i], N)
         return t, ox, w, r, oy, v
-
-    """def generate_w_data_with_fix_t(self, r: float, t: float, N: int):
-        
-        Генерирует значения функции w(r, t)
-
-        :param N: количество элементов (точность подсчёта функции)
-        :param t: фиксированный параметр t
-
-        :return вектор двух numpy массивов
-        
-        r = np.linspace(0, 10, 800)
-        w = np.zeros(800)
-        for i in range(800):
-            w[i] = self.calculate_sum(r[i], t, N)
-        return r, w
-
-    def generate_w_data_with_fix_r(self, r: float, t: float, N: int):
-        
-        Генерирует значения функции w(r, t)
-
-        :param N: количество элементов (точность подсчёта функции)
-        :param r: фиксированный параметр r
-
-        :return вектор двух numpy массивов
-        
-        t = np.linspace(0, 10, 800)
-        w = np.zeros(800)
-        for i in range(800):
-            w[i] = self.calculate_sum(r, t[i], N)
-        return t, w
-    """
 
 
 if __name__ == "__main__":
