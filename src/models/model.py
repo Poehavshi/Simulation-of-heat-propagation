@@ -50,11 +50,22 @@ class SumModel:
         :return значение одного слагаемого суммы
         """
         # mu_n = jn_zeros(0, n)[n - 1]
-        mu_n = self.mu_array[n-1]
+        mu_n = self.mu_array[n - 1]
         result = (5 * self.R * jv(1, self.R / 4)) / (mu_n ** 2 * (jv(1, mu_n)) ** 2)
         result *= exp(-(t * (self.l * self.k * (mu_n / self.R) ** 2) + 2 * self.alpha) / (self.l * self.c))
         result *= jv(0, (mu_n * r) / self.R)
         return result
+
+    def phi(self, N, t):
+        result = (self.R * 5) / (1 - exp(-(t * self.k) / (self.c * self.R ** 2)))
+        result *= exp((-t * self.k * (N + 1)) / (self.c * self.R ** 2))
+        return result
+
+    def calculate_number_of_iterations(self, epsilon, t):
+        N = 1
+        while self.phi(N, t) < epsilon:
+            N += 1
+        return N
 
     def calculate_sum(self, r: float, t: float, N: int) -> float:
         """
@@ -71,7 +82,7 @@ class SumModel:
             result += self._calculate_term(i + 1, r, t)
         return result
 
-    def generate_w_data(self, r: float, t: float, N: int,x:int):
+    def generate_w_data(self, r: float, t: float, N: int, x: int):
         """
         Генерирует значения функции w(r, t)
 
@@ -91,4 +102,6 @@ class SumModel:
 
 
 if __name__ == "__main__":
-    print(jv(0, jn_zeros(0, 40)))
+    model = SumModel()
+    print(model.mu_array)
+    print(exp())
