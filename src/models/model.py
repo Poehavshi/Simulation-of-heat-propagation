@@ -37,7 +37,8 @@ class SumModel:
         self.l = l
         self.R = R
 
-        self.mu_array = jn_zeros(0, 50)
+        self.mu_array = jn_zeros(0, 51)
+
 
     def _calculate_term(self, n: int, r: float, t: float) -> float:
         """
@@ -51,7 +52,7 @@ class SumModel:
         """
         # mu_n = jn_zeros(0, n)[n - 1]
         mu_n = self.mu_array[n - 1]
-        result = (5 * self.R * jv(1, self.R / 4)) / (mu_n ** 2 * (jv(1, mu_n)) ** 2)
+        result = (5 * jv(1, mu_n / 4)) / (mu_n * (jv(1, mu_n)) ** 2)
         result *= exp(-(t * (self.l * self.k * (mu_n / self.R) ** 2) + 2 * self.alpha) / (self.l * self.c))
         result *= jv(0, (mu_n * r) / self.R)
         return result
@@ -107,4 +108,3 @@ class SumModel:
 if __name__ == "__main__":
     model = SumModel()
     print(model.mu_array)
-    print(exp())
