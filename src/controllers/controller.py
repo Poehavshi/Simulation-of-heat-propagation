@@ -35,8 +35,15 @@ class Controller:
         """
         self.plot_data = None
         self.view = View(root_tk, self)
-        self.default_values = {'N': 1, 'r': 0, 't':0,'x':0}
+        self.default_values = {'N': 1, 'r': -1, 't':-1,'x':0}
         self.initialize_view()
+        self.colors = ['red','blue','black','green','yellow','orange','purple']
+        self.color_id = 0
+
+    def get_current_color(self):
+        while (self.color_id>=len(self.colors)):
+            color_id -= len(self.colors)
+        return self.colors[self.color_id]
 
     def initialize_view(self):
         """
@@ -70,11 +77,13 @@ class Controller:
         Вызывает методы View для очистки и перерисовки графика
         использует копию данных для отрисовки от контроллера.
         """
-        self.view.canvas.clear()
-        if (self.plot_data[0]!=0):
-            self.view.canvas.plot(self.plot_data[1],self.plot_data[2],color='b')
-        if (self.plot_data[3]!=0):
-            self.view.canvas.plot(self.plot_data[4],self.plot_data[5],color='r')
+        #self.view.canvas.clear()
+        if (self.plot_data[0]!=-1):
+            self.view.canvas.plot(self.plot_data[1],self.plot_data[2],color=self.get_current_color())
+            self.color_id += 1
+        if (self.plot_data[3]!=-1):
+            self.view.canvas.plot(self.plot_data[4],self.plot_data[5],color=self.get_current_color())
+            self.color_id += 1
 
 
 if __name__ == '__main__':

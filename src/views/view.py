@@ -121,6 +121,8 @@ class View(ttk.Frame):
         self.named_paramx = tk.StringVar()
         self.named_paramx_entry.config(textvariable=self.named_paramx)
 
+        ttk.Button(self, text='clear', command = self.clear).pack(side=tk.LEFT)
+
 
 
     def add_entry(self, text: str):
