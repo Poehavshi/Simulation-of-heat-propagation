@@ -77,15 +77,14 @@ class View(ttk.Frame):
         ttk.Frame.__init__(self, parent, **options)
         self.canvas = None
         self.figure = None
-        self.named_paramr = None
-        self.named_paramr_entry = None
-        self.paramr_name = 'r'
-        self.named_paramt = None
-        self.named_paramt_entry = None
-        self.paramt_name = 't'
+        self.named_param = None
+        self.named_param_entry = None
+        self.param_name = 't'
         self.named_paramx = None
         self.named_paramx_entry = None
         self.paramx_name = 'x'
+        
+        self.btn = ttk.Button(self, text='t', command = self.change)
 
         self.countN = None
         self.countN_entry = None
@@ -96,6 +95,7 @@ class View(ttk.Frame):
         self.values = {}
 
         self.create_entries()
+
         self.create_bindings()
         self.create_canvas()
 
@@ -104,20 +104,21 @@ class View(ttk.Frame):
         Создаёт поля ввода и связанные с ними лейблы в View, также привязывает
         StringVar объекты к виджетам поля ввода.
         """
-        self.countN_entry = self.add_entry('N')
+        ttk.Label(self, text='N').pack(side=tk.LEFT)
+        self.countN_entry = self.add_entry()
         self.countN = tk.StringVar()
         self.countN_entry.config(textvariable=self.countN)
         self.countN_entry.focus_set()
+        
+        self.btn.pack(side=tk.LEFT)
 
-        self.named_paramr_entry = self.add_entry(self.paramr_name)
-        self.named_paramr = tk.StringVar()
-        self.named_paramr_entry.config(textvariable=self.named_paramr)
+        self.named_param_entry = self.add_entry()
+        self.named_param = tk.StringVar()
+        self.named_param_entry.config(textvariable=self.named_param)
 
-        self.named_paramt_entry = self.add_entry(self.paramt_name)
-        self.named_paramt = tk.StringVar()
-        self.named_paramt_entry.config(textvariable=self.named_paramt)
-
-        self.named_paramx_entry = self.add_entry(self.paramx_name)
+        
+        ttk.Label(self, text='x').pack(side=tk.LEFT)
+        self.named_paramx_entry = self.add_entry()
         self.named_paramx = tk.StringVar()
         self.named_paramx_entry.config(textvariable=self.named_paramx)
 
@@ -125,7 +126,7 @@ class View(ttk.Frame):
 
 
 
-    def add_entry(self, text: str):
+    def add_entry(self):
         """
         Создаёт пару виджетов лейбла и поля ввода
 
@@ -134,7 +135,8 @@ class View(ttk.Frame):
 
         :return entry: созданный ttk.Entry объект
         """
-        ttk.Label(self, text=text).pack(side=tk.LEFT)
+        
+       
 
         # проверка каждого нажатия клавиши на ввод числового значения в поле ввода
         entry = ttk.Entry(self, validate='key')
@@ -228,8 +230,8 @@ class View(ttk.Frame):
         :return значения base и exponent в виджете
         """
         return {'N': int(self.countN.get()),
-                'r': int(self.named_paramr.get()),
-                't': int(self.named_paramt.get()),
+                'p': str(self.param_name),
+                'r': int(self.named_param.get()),
                 'x': int(self.named_paramx.get())}
 
     def update_values(self):
@@ -274,16 +276,26 @@ class View(ttk.Frame):
         :param values: значения по умолчанию
         """
         self.countN.set(values['N'])
-        self.named_paramr.set(values[self.paramr_name])
-        self.named_paramt.set(values[self.paramt_name])
+        self.named_param.set(values['r'])
         self.named_paramx.set(values[self.paramx_name])
         self.values = values
+
+    def get_type(self):
+        return self.param_name
 
     def clear(self):
         """
         Очищает matplotlib canvas.
         """
         self.canvas.clear()
+
+    def change(self):
+        if (self.param_name == 'r'):
+            self.param_name = 't'
+        else:
+            self.param_name = 'r'
+        self.btn.config(text = self.param_name)
+        #self.named_param_entry.config(textvariable=self.named_param)
 
     def plot(self, x: np.array, y: np.array):
         """

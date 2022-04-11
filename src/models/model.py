@@ -82,7 +82,7 @@ class SumModel:
             result += self._calculate_term(i + 1, r, t)
         return result
 
-    def generate_w_data(self, r: float, t: float, N: int, x: int):
+    def generate_w_data(self, r: int, p: str, N: int, x: int):
         """
         Генерирует значения функции w(r, t)
 
@@ -92,13 +92,16 @@ class SumModel:
         :return вектор двух numpy массивов
         """
         ox = np.linspace(0, x, 800)
-        oy = np.linspace(0, x, 800)
         w = np.zeros(800)
-        v = np.zeros(800)
-        for i in range(800):
-            w[i] = self.calculate_sum(ox[i], t, N)
-            v[i] = self.calculate_sum(r, oy[i], N)
-        return t, ox, w, r, oy, v
+        if p=='r':
+            for i in range(800):
+                w[i] = self.calculate_sum(r, ox[i], N)
+        else:
+            ox = np.linspace(0, x, 800)
+            w = np.zeros(800)
+            for i in range(800):
+                w[i] = self.calculate_sum(ox[i], r, N)
+        return ox, w
 
 
 if __name__ == "__main__":
