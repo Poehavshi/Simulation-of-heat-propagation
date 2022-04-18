@@ -37,7 +37,7 @@ class SumModel:
         self.l = l
         self.R = R
 
-        self.mu_array = jn_zeros(0, 51)
+        self.mu_array = jn_zeros(0, 3051)
 
 
     def _calculate_term(self, n: int, r: float, t: float) -> float:
@@ -58,15 +58,19 @@ class SumModel:
         return result
 
     def phi(self, N, t):
-        result = (self.R * 5) / (1 - exp(-(t * self.k) / (self.c * self.R ** 2)))
-        result *= exp((-t * self.k * (N + 1)) / (self.c * self.R ** 2))
+        result = ((self.R**2) * self.c * 5 * 2**0.5) / (2 * self.k * np.pi**2 * t *(N-0.25)**1.5)
+        result *= np.exp((-(2*self.alpha*t)/(self.l*self.c)) - ((t*self.k*(np.pi**2)*((N-0.25)**2))/(self.c*(self.R**2))))
+
         return result
 
     def calculate_number_of_iterations(self, epsilon, t):
         N = 1
-        while self.phi(N, t) < epsilon:
+        while self.phi(N, t) > epsilon:
             N += 1
         return N
+
+    def calculate_eps_of_iterations(self, N, t):
+        return self.phi(N, t)
 
     def calculate_sum(self, r: float, t: float, N: int) -> float:
         """
@@ -83,7 +87,7 @@ class SumModel:
             result += self._calculate_term(i + 1, r, t)
         return result
 
-    def generate_w_data(self, r: int, p: str, N: int, x: int):
+    def generate_w_data(self, N: int,r: float,p:str, x: int):
         """
         Генерирует значения функции w(r, t)
 
@@ -96,12 +100,11 @@ class SumModel:
         w = np.zeros(800)
         if p=='r':
             for i in range(800):
-                w[i] = self.calculate_sum(r, ox[i], N)
+                w[i] = self.calculate_sum(r=r, t=ox[i], N=N)
         else:
-            ox = np.linspace(0, x, 800)
-            w = np.zeros(800)
+
             for i in range(800):
-                w[i] = self.calculate_sum(ox[i], r, N)
+                w[i] = self.calculate_sum(r=ox[i], t=r, N=N)
         return ox, w
 
 

@@ -28,19 +28,24 @@ class MPLgraph(FigureCanvasTkAgg):
         self.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.toolbar = NavigationToolbar2Tk(self, parent)
         self.toolbar.update()
+        
 
-    def plot(self, x: np.array, y: np.array, color):
+    def plot(self, x: np.array, y: np.array, color,label):
         """
         Берёт массивы координат x и y, по ним рисует графики.
         """
-        self.add.plot(x, y,color = color)
+        self.add.plot(x, y,color = color,label=label)
+        self.lgn=self.figure.legend()
         self.figure.canvas.draw()
+        self.lgn.remove()
+
 
     def clear(self):
         """
         Очищает область с графиком.
         """
         self.add.clear()
+        #self.lgn.remove()
         self.figure.canvas.draw()
 
 
@@ -79,15 +84,19 @@ class View(ttk.Frame):
         self.figure = None
         self.named_param = None
         self.named_param_entry = None
-        self.param_name = 't'
+        self.param_name = 'r'
         self.named_paramx = None
         self.named_paramx_entry = None
         self.paramx_name = 'x'
         
-        self.btn = ttk.Button(self, text='t', command = self.change)
+        self.paramN_name = 'N'
+        self.btnN = ttk.Button(self, text='N', command = self.changeN)
+        self.btn = ttk.Button(self, text='r', command = self.change)
 
+        self.countN_entry =None
         self.countN = None
-        self.countN_entry = None
+        self.eps_param = None
+        self.eps_entry = None
         self.pack()
 
         self.parent = parent
@@ -95,6 +104,7 @@ class View(ttk.Frame):
         self.values = {}
 
         self.create_entries()
+        
 
         self.create_bindings()
         self.create_canvas()
@@ -104,11 +114,19 @@ class View(ttk.Frame):
         Создаёт поля ввода и связанные с ними лейблы в View, также привязывает
         StringVar объекты к виджетам поля ввода.
         """
+
+        
         ttk.Label(self, text='N').pack(side=tk.LEFT)
         self.countN_entry = self.add_entry()
         self.countN = tk.StringVar()
         self.countN_entry.config(textvariable=self.countN)
-        self.countN_entry.focus_set()
+        self.btnN.pack(side=tk.LEFT)
+
+
+        ttk.Label(self, text='E').pack(side=tk.LEFT)
+        self.eps_entry = self.add_entry()
+        self.eps_param = tk.StringVar()
+        self.eps_entry.config(textvariable=self.eps_param)
         
         self.btn.pack(side=tk.LEFT)
 
@@ -123,6 +141,8 @@ class View(ttk.Frame):
         self.named_paramx_entry.config(textvariable=self.named_paramx)
 
         ttk.Button(self, text='clear', command = self.clear).pack(side=tk.LEFT)
+
+
 
 
 
@@ -180,13 +200,13 @@ class View(ttk.Frame):
         """
         Привязывает события ко всем entry виджетам (полям ввода)
         """
-        self.bind_class('TEntry', '<FocusIn>',
-                        lambda event: self.on_focus_in(event))
+        #self.bind_class('TEntry', '<FocusIn>',
+        #                lambda event: self.on_focus_in(event))
         self.bind_class('TEntry', '<Return>',
                         lambda event: self.on_value_entry(event))
-        self.bind_class('TEntry', '<Tab>', lambda event: self.on_tab(event))
-        self.bind_class('TEntry', '<FocusOut>',
-                        lambda event: self.refresh())
+        #self.bind_class('TEntry', '<Tab>', lambda event: self.on_tab(event))
+        #self.bind_class('TEntry', '<FocusOut>',
+        #                lambda event: self.refresh())
 
     @staticmethod
     def on_focus_in(event):
@@ -229,9 +249,15 @@ class View(ttk.Frame):
 
         :return значения base и exponent в виджете
         """
+        if self.paramN_name =='E':
+            self.countN.set(self.controller.updateN(float(self.eps_param.get()),float(self.named_param.get())))
+        #else:
+        #    self.eps_param.set(self.controller.updateEps(float(self.countN.get()),float(self.named_param.get())))
         return {'N': int(self.countN.get()),
+                'K': str(self.paramN_name),
+                'E': float(self.eps_param.get()),
                 'p': str(self.param_name),
-                'r': int(self.named_param.get()),
+                'r': float(self.named_param.get()),
                 'x': int(self.named_paramx.get())}
 
     def update_values(self):
@@ -239,6 +265,10 @@ class View(ttk.Frame):
         Переписывает словарь с предыдущими значениями в поле ввода текущими значениями
         """
         self.values = self.get_current_values()
+
+        if self.paramN_name=='E':
+            self.countN_entry.config(textvariable=self.countN)
+
 
     def set_next_focus(self, next_widget):
         """
@@ -276,8 +306,10 @@ class View(ttk.Frame):
         :param values: значения по умолчанию
         """
         self.countN.set(values['N'])
+
+        self.eps_param.set(values['E'])
         self.named_param.set(values['r'])
-        self.named_paramx.set(values[self.paramx_name])
+        self.named_paramx.set(values['x'])
         self.values = values
 
     def get_type(self):
@@ -296,6 +328,13 @@ class View(ttk.Frame):
             self.param_name = 'r'
         self.btn.config(text = self.param_name)
         #self.named_param_entry.config(textvariable=self.named_param)
+
+    def changeN(self):
+        if (self.paramN_name == 'N'):
+            self.paramN_name = 'E'
+        else:
+            self.paramN_name = 'N'
+        self.btnN.config(text = self.paramN_name)
 
     def plot(self, x: np.array, y: np.array):
         """

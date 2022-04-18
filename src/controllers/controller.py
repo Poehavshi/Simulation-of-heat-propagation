@@ -33,9 +33,10 @@ class Controller:
         """
         :param root_tk: tkinter.Tk() объект, который используется представлением.
         """
+        self.lbl = 1
         self.plot_data = None
         self.view = View(root_tk, self)
-        self.default_values = {'N': 25, 'p': 't', 'r':1,'x':4}
+        self.default_values = {'N': 16, 'K':'N', 'E' : 0.01, 'p': 'r', 'r':0,'x':150} 
         self.colors = ['red','blue','black','green','yellow','orange','purple']
         self.color_id = 0
         self.initialize_view()
@@ -49,6 +50,11 @@ class Controller:
         """
         Инициализирует поля ввода и рисует график на холсте.
         """
+        summodel = model.SumModel()
+        if (self.default_values['K']=='E'):
+            self.default_values['N'] = summodel.calculate_number_of_iterations(self.default_values['E'],self.default_values['r'])
+        #else:
+        #    self.default_values['E'] = summodel.calculate_eps_of_iterations(self.default_values['N'],self.default_values['r'])
         self.default_values['p'] = self.view.get_type()
         self.view.set_values(self.default_values)
         self.update_view(self.default_values)
@@ -69,9 +75,21 @@ class Controller:
         :param values: словарь с данным от модели
         """
         summodel = model.SumModel()
-        self.plot_data = summodel.generate_w_data(**values)
-        #self.plot_data = summodel.generate_w_data_with_fix_r(**values)
+        if (values['K']=='E'):
+            values['N'] = summodel.calculate_number_of_iterations(values['E'],values['r'])
+        #else:
+        #    values['E'] = summodel.calculate_eps_of_iterations(values['N'],values['r'])
+        self.lbl = str("N=" + str(values['N']) +" " +str(values['p'])+ "="+str(values['r']))
+        self.plot_data = summodel.generate_w_data(values['N'],values['r'],values['p'],values['x'])
 
+
+    def updateN(self, eps, t):
+        summodel = model.SumModel()
+        return summodel.calculate_number_of_iterations(eps,t)
+
+    def updateEps(self, N, t):
+        summodel = model.SumModel()
+        return summodel.calculate_eps_of_iterations(N,t)
 
     def update_view_plot(self):
         """
@@ -79,7 +97,7 @@ class Controller:
         использует копию данных для отрисовки от контроллера.
         """
         #self.view.canvas.clear()
-        self.view.canvas.plot(self.plot_data[0],self.plot_data[1],color=self.get_current_color())
+        self.view.canvas.plot(self.plot_data[0],self.plot_data[1],color=self.get_current_color(),label = self.lbl)
         self.color_id += 1
 
 
