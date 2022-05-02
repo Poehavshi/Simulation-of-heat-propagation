@@ -36,7 +36,7 @@ class Controller:
         self.lbl = 1
         self.plot_data = None
         self.view = View(root_tk, self)
-        self.default_values = {'N': 16, 'K':'N', 'E' : 0.01, 'p': 'r', 'r':0,'x':150} 
+        self.default_values = {'N': 6, 'K':'N', 'E' : 0.01, 'p': 'r', 'r':0,'x':150} 
         self.colors = ['red','blue','black','green','yellow','orange','purple']
         self.color_id = 0
         self.initialize_view()
@@ -80,7 +80,7 @@ class Controller:
         #else:
         #    values['E'] = summodel.calculate_eps_of_iterations(values['N'],values['r'])
         self.lbl = str("N=" + str(values['N']) +" " +str(values['p'])+ "="+str(values['r']))
-        self.plot_data = summodel.generate_w_data(values['N'],values['r'],values['p'],values['x'])
+        self.plot_data = summodel.generate_w_data(values['N'],values['r'],values['p'],values['x'],values["E"])
 
 
     def updateN(self, eps, t):

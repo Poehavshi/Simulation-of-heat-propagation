@@ -7,7 +7,7 @@
 # !TODO расчёт суммы ряда
 
 import numpy as np
-from scipy.special import jv, jn_zeros
+from scipy.special import jv, jn_zeros,j1
 from numpy import exp
 
 
@@ -37,7 +37,7 @@ class SumModel:
         self.l = l
         self.R = R
 
-        self.mu_array = jn_zeros(0, 3051)
+        self.mu_array = jn_zeros(0, 1251)
 
 
     def _calculate_term(self, n: int, r: float, t: float) -> float:
@@ -53,7 +53,8 @@ class SumModel:
         # mu_n = jn_zeros(0, n)[n - 1]
         mu_n = self.mu_array[n - 1]
         result = (5 * jv(1, mu_n / 4)) / (mu_n * (jv(1, mu_n)) ** 2)
-        result *= exp(-(t * (self.l * self.k * (mu_n / self.R) ** 2) + 2 * self.alpha) / (self.l * self.c))
+        #result=(5 * jv(1, mu_n / 4)) / (mu_n )
+        result *= exp(-(t * (self.l * self.k * (mu_n / self.R) ** 2 + 2 * self.alpha)) / (self.l * self.c))
         result *= jv(0, (mu_n * r) / self.R)
         return result
 
@@ -87,7 +88,7 @@ class SumModel:
             result += self._calculate_term(i + 1, r, t)
         return result
 
-    def generate_w_data(self, N: int,r: float,p:str, x: int):
+    def generate_w_data(self, N: int,r: float,p:str, x: int,E:float):
         """
         Генерирует значения функции w(r, t)
 
@@ -96,7 +97,7 @@ class SumModel:
 
         :return вектор двух numpy массивов
         """
-        ox = np.linspace(0, x, 800)
+        ox = np.linspace(0.001, x, 800)
         w = np.zeros(800)
         if p=='r':
             for i in range(800):
@@ -105,6 +106,9 @@ class SumModel:
 
             for i in range(800):
                 w[i] = self.calculate_sum(r=ox[i], t=r, N=N)
+        if r!=0:
+            #print(abs(abs(self.calculate_sum(r=r,t=ox[0],N=N))-abs(self.calculate_sum(r=r,t=ox[0],N=self.calculate_number_of_iterations(E,r)))))
+            print(w[0])
         return ox, w
 
 
